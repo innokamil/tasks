@@ -1,0 +1,2 @@
+There is a table that stores information about the production of a certain material at a plant, called BoM (Bill of Material). In any plant, the final product goes through several production stages, each resulting in a part of the final product, which, in subsequent stages and combinations with other materials, creates the final product. This table stores these production stages through the material -> components relationship, where material is the final product of some stage, and components are the components of that material.
+
