@@ -1,10 +1,8 @@
 from typing import Any, Dict 
 from database.database import Database, DatabaseCredentials, QueryResult
 import os
-from pathlib import Path
 import psycopg
 from managers.resources import ResourceManager
-from utils.readers import read_from_json
 from datetime import datetime
 
 
@@ -16,38 +14,44 @@ class Postgres(Database):
                  output: str):
         self.output: str = output
         self.dsn: str | None = credentials.into_dsn()
-        assert self.dsn, f"'{self.dsn}' is not a valid DSN format."
+        if not self.dsn:
+            raise ValueError(f"'{self.dsn}' is not a valid DSN format.")
 
         resource_dir: str | None = os.getenv("RESOURCES_DIRECTORY")
-        assert resource_dir, f"""'{resource_dir}' is not a
-        valid path for resource directory."""
+        if not resource_dir:
+            raise ValueError(f"'{resource_dir}' is not a valid path for resource directory.")
+
         self.resource_manager: ResourceManager = ResourceManager(
             resource_dir,
+            "dump",
             students=(students_path if students_path else "students.json"),
             rooms=(rooms_path if rooms_path else "rooms.json")
         )
+        if output not in ("json", "xml"):
+            raise ValueError(f"{output} is not supported type")
+
         self.queries: Dict[str, str] = {
             "q1" : "select * from number_of_students_in_each_room",
             "q2" : "select * from top5_average_age_in_room",
             "q3" : "select * from top5_age_difference_in_room",
             "q4" : "select * from rooms_with_different_genders" 
         }
-        self._initialize_schema()
+        try:
+            self._initialize_schema()
+        except ValueError as e:
+            print(f"Couldn't initialize the schema: {e}")
+            exit(1)
 
     def select(self, stmt: str) -> QueryResult:
         with psycopg.connect(self.dsn) as conn:
             with conn.cursor() as cur:
                 cur.execute(stmt)
                 res = QueryResult(
-                    filename=("result"+str(int(datetime.timestamp(datetime.now())))),
+                    filename=("result"+str(int(datetime.timestamp(datetime.now())))+f".{self.output}"),
                     colnames=[col[0] for col in cur.description],
                     records=cur.fetchall()
                 )
-                match self.output:
-                    case "json":
-                        res.write_into_json()
-                    case "xml":
-                        res.write_into_xml()
+                self.resource_manager.serialize_query(res, self.output)
                 return res
 
     def insert(self, stmt: str, items: Any):
@@ -58,17 +62,13 @@ class Postgres(Database):
 
 
     def _initialize_schema(self) -> None | bool:
-        rooms_path: Path | None = self.resource_manager["rooms"]
-        assert rooms_path, f"{rooms_path} is not a valid Path."
+        rooms = self.resource_manager.read_from_json("rooms")
+        if not rooms:
+            raise ValueError(f"Couldn't load JSON with rooms data.")
 
-        rooms = read_from_json(rooms_path)
-        assert rooms, f"Couldn't load json from {rooms_path}"
-
-        students_path: Path | None = self.resource_manager["students"]
-        assert students_path, f"{students_path} is not a valid Path."
-
-        students = read_from_json(students_path)
-        assert students,f"Couldn't load json from {students_path}"
+        students = self.resource_manager.read_from_json("students")
+        if not students:
+            raise ValueError(f"Couldn't load JSON with rooms data.")
 
         rooms_result = self.select(stmt="select * from rooms limit 1;")
         if len(rooms_result.records) <= 0:

@@ -16,5 +16,3 @@ ENV PYTHONUNBUFFERED=1
 COPY pyproject.toml poetry.lock ./
 RUN poetry install --no-root
 COPY . .
-ENTRYPOINT ["poetry"]
-CMD ["run", "python", "app.py"]

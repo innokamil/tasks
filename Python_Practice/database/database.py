@@ -1,15 +1,15 @@
 import abc
-import os
 from pathlib import Path
-from typing import Any,  Tuple, List
+from typing import Any, Dict,  Tuple, List
 from dataclasses import dataclass
 from tabulate import tabulate
-from utils.writers import write_into_json, write_into_xml
+from utils.readers import IDeserialize
+from utils.writers import ISerialize
 
 @dataclass
-class QueryResult:
+class QueryResult(ISerialize, IDeserialize):
     filename: str
-    colnames: List[str] 
+    colnames: List[str]
     records: List[Tuple]
     """
     Representation of a Result after Querying in the Database class.
@@ -19,38 +19,23 @@ class QueryResult:
         colnames: Column names present in the returned table.
         records: Data records in the table.
     """
+    def _write_into_json(self, path: str | Path, obj: Dict | List[Dict])->bool:
+        return super()._write_into_json(path, obj)
+
+    def _write_into_xml(self, path: str | Path, obj: Dict | List[Dict])->bool:
+        return super()._write_into_xml(path, obj)
+    
+    @classmethod
+    def _read_from_json(cls, filename: str | Path) -> None | Any:
+        # Now return just string / object but deserialize it into this class and
+        # return it
+        return super()._read_from_json(filename)
+    @classmethod
+    def _read_from_xml(cls, filename: str | Path) -> None | Any:
+        return super()._read_from_xml(filename)
 
     def __repr__(self) -> str:
         return tabulate(self.records, headers=self.colnames, tablefmt="grid")
-
-    def write_into_json(self) -> bool:
-        """
-        Serialization into JSON file. Filename is deduced from the attribute `filename`.
-        
-        Returns:
-            True if writing into JSON completed.
-        """
-        obj = list(map(lambda record: {
-            k : v for k, v in zip(self.colnames, record)
-        }, self.records))
-        write_into_json(Path(os.getenv("RESOURCES_DIRECTORY"))/"dump"/self.filename,
-                        obj)
-        return True
-
-    def write_into_xml(self) -> bool:
-        """
-        Serialization into XML file. Filename is deduced from the attribute `filename`.
-        
-        Returns:
-            True if writing into XML completed.
-        """
-        obj = list(map(lambda record: {
-            k : v for k, v in zip(self.colnames, record)
-        }, self.records))
-        write_into_xml(Path(os.getenv("RESOURCES_DIRECTORY"))/"dump"/self.filename,
-                        obj)
-        return True
-
 
 
 @dataclass

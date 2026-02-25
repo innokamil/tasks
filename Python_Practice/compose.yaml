@@ -1,8 +1,18 @@
 services:
   app:
+    entrypoint: ["poetry", "run", "python", "app.py"]
+    command: [
+      "--read", "result1772042419.xml",
+      "--students", "students.json",
+      "--rooms", "rooms.json",
+      "--output", "xml",
+      "--query", "q2"
+    ]
     build:
       context: .
       target: dev
+    volumes:
+      - python-resources:/code/resources/
     networks:
       - front-tier
       - back-tier
@@ -39,6 +49,7 @@ services:
 
 volumes:
   pg-data: {}
+  python-resources: {}
 networks:
   front-tier: {}
   back-tier: {}

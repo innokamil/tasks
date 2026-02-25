@@ -4,6 +4,8 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description="Python BigData Task 1.")
+    parser.add_argument("--read", required=False, 
+                        default=None, help="Read a result")
     parser.add_argument("-s", "--students", required=False, 
                         default=None, help="Path to the students.json")
     parser.add_argument("-r", "--rooms", required=False, 
@@ -14,12 +16,17 @@ def main():
                         choices=["q1", "q2", "q3", "q4"], 
                         help="Answer to the question")
     args = parser.parse_args()
+
     dc = DatabaseCredentials(dbname="task1", 
                              port="5432", 
                              user="innowise",
                              password="innowise")
     pgdb = Postgres(credentials=dc, students_path=args.students,
                     rooms_path=args.rooms, output=args.output)
+    if args.read:
+        print(pgdb.resource_manager.read_result(args.read))
+        return
+
     res = pgdb.select(stmt=pgdb.queries[args.query])
     print(f"Saved in: {res.filename}")
 
