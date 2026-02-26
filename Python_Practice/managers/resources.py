@@ -22,7 +22,8 @@ class ResourceManager(IDeserialize, ISerialize):
         self.dump_dir: Path = self.construct_path(dump_dir)
         self.resource_paths: Dict[str, Path] = {
             k : self.construct_path(v) for k, v in kwargs.items()
-        } 
+        }
+        self.mkdir(self.dump_dir)
 
     def read_result(self, what: str) -> Any:
         location: Path = self.dump_dir / what

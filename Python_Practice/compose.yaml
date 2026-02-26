@@ -2,11 +2,11 @@ services:
   app:
     entrypoint: ["poetry", "run", "python", "app.py"]
     command: [
-      "--read", "result1772042419.xml",
+      # "--read", "RESULT-HERE.json",
       "--students", "students.json",
       "--rooms", "rooms.json",
-      "--output", "xml",
-      "--query", "q2"
+      "--output", "json",
+      "--query", "q1"
     ]
     build:
       context: .

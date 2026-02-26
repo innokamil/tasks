@@ -14,10 +14,15 @@ class IDeserialize(abc.ABC):
             filename: A full path to a file.
 
         Returns:
-            JSON object if read successfully otherwise None.
+            Object of user choice, if reading failed then None is returned.
         """
-        with open(filename, "r") as obj:
-            return json.loads(obj.read()) 
+        try:
+            with open(filename, "r") as obj:
+                return json.loads(obj.read()) 
+        except FileNotFoundError as e:
+            print(f"Couldn't open the file: {e}")
+            return None
+
 
     @classmethod
     @abc.abstractmethod
@@ -29,8 +34,11 @@ class IDeserialize(abc.ABC):
             filename: A full path to a file.
 
         Returns:
-            XML object if read successfully otherwise None.
+            Object of user choice, if reading failed then None is returned.
         """
-
-        with open(filename, "r") as obj:
-            return obj.read()
+        try:
+            with open(filename, "r") as obj:
+                return obj.read()
+        except FileNotFoundError as e:
+            print(f"Couldn't open the file: {e}")
+            return None
