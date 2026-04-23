@@ -1,0 +1,56 @@
+services:
+  app:
+    entrypoint: ["/opt/spark/bin/spark-submit"]
+    command: [
+    "--master", "local[6]",
+    "/code/ex7.py"
+    ]
+    build:
+      context: .
+      target: dev
+    networks:
+      - front-tier
+      - back-tier
+    depends_on:
+      pgdb:
+        condition: service_healthy
+        restart: true
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: .
+          initial_sync: true
+  pgdb:
+    image: postgres:17
+    container_name: pagila
+    networks:
+      - back-tier
+    environment:
+      POSTGRES_PASSWORD: "123456"
+      POSTGRES_USER: "postgres"
+      POSTGRES_DB: "pagila"
+    volumes:
+      - ./pagila/pagila-schema.sql:/docker-entrypoint-initdb.d/1-pagila-schema.sql
+      - ./pagila/pagila-schema-jsonb.sql:/docker-entrypoint-initdb.d/1-pagila-schema-jsonb.sql
+      - ./pagila/pagila-data.sql:/docker-entrypoint-initdb.d/2-pagila-data.sql
+      - ./pagila/restore-pagila-data-jsonb.sh:/docker-entrypoint-initdb.d/3-restore-pagila-data-jsonb.sh
+      - ./pagila/pagila-data-yum-jsonb.backup:/docker-entrypoint-initdb.d/pagila-data-yum-jsonb.backup
+      - ./pagila/pagila-data-apt-jsonb.backup:/docker-entrypoint-initdb.d/pagila-data-apt-jsonb.backup
+      - pgdata:/var/lib/postgresql/data
+    expose:
+      - 5432
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 120s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  pgdata: {}
+networks:
+  front-tier: {}
+  back-tier: {}

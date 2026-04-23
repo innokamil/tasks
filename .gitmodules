@@ -1,0 +1,3 @@
+[submodule "SparkPractice/pagila"]
+	path = SparkPractice/pagila
+	url = https://github.com/devrimgunduz/pagila.git
