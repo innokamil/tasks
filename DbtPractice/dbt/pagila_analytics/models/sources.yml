@@ -1,0 +1,20 @@
+sources:
+  - name: pagila_raw 
+    database: RAW
+    schema: PAGILA
+    config:
+      freshness:
+        warn_after: {count: 6, period: hour}
+        error_after: {count: 12, period: hour}
+    tables:
+      - name: PAGILA_FILM 
+      - name: PAGILA_ACTOR
+      - name: PAGILA_CATEGORY
+      - name: PAGILA_RENTAL
+      - name: PAGILA_CUSTOMER
+      - name: PAGILA_INVENTORY
+      - name: PAGILA_PAYMENT
+      - name: PAGILA_ADDRESS 
+      - name: PAGILA_CITY
+      - name: PAGILA_FILM_ACTOR
+      - name: PAGILA_FILM_CATEGORY
