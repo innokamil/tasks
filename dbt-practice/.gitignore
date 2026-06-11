@@ -1,0 +1,7 @@
+dbt/logs/
+dbt/pagila_analytics/target/
+dbt/pagila_analytics/dbt_packages/
+dbt/.venv/
+airflow/.venv/
+airflow/data/*
+!airflow/data/**/.gitkeep
