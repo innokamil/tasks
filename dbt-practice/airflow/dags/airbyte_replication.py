@@ -2,7 +2,6 @@ from airflow.providers.airbyte.operators.airbyte import AirbyteTriggerSyncOperat
 from airflow.providers.standard.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.sdk import dag 
 import datetime
-
 from config import AIRBYTE_PAGILA_SYNC_CONN_ID, AIRBYTE_SAKILA_SYNC_CONN_ID
 
 
@@ -28,6 +27,7 @@ def airbyte_replication():
     # They are independent
     _trigger_model_build = TriggerDagRunOperator(task_id="trigger_model_build", 
                                                  trigger_dag_id="dbt_run_models")
+    # Task only specifies models for pagila
     _sync_pagila >> _trigger_model_build
     _sync_sakila
 

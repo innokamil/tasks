@@ -4,6 +4,7 @@ from airflow.providers.docker.operators.docker import DockerOperator
 import datetime
 from config import DBT_CONTAINER_NAME, DBT_DEFAULT_CREDENTIALS_LOCATION, DBT_IMAGE
 
+
 @dag(dag_id="dbt_run_models",
      start_date=datetime.datetime(2026, 5, 28),
      schedule=None,
